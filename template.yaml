@@ -1,0 +1,89 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: 'twote liker'
+
+Parameters:
+  DEBUG:
+    Type: String
+    Default: "true"
+    AllowedValues:
+      - "true"
+      - "false"
+  TwitterBearerToken:
+    Type: String
+    Default: '{{resolve:ssm:twitterBearerToken:1}}'
+    AllowedValues:
+      - '{{resolve:ssm:twitterBearerToken:1}}'
+
+  TwitterApiKeySecret:
+    Type: String
+    Default: '{{resolve:ssm:twitterApiKeySecret:1}}'
+    AllowedValues:
+      - '{{resolve:ssm:twitterApiKeySecret:1}}'
+
+Globals:
+  Function:
+    Timeout: 15
+    MemorySize: 128
+    Runtime: nodejs14.x
+    Environment:
+      Variables:
+        DEBUG: !Ref DEBUG
+        twitterBearerToken: !Ref TwitterBearerToken
+
+Resources:
+  HttpApiGateway:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: v1
+      Cors:
+        AllowHeaders: "*"
+        AllowMethods: "*"
+        AllowOrigin: "*"
+
+  ChallengeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./dist
+      Handler: functions/challenge.handler
+      Environment:
+        Variables:
+          twitterApiKeySecret: !Ref TwitterApiKeySecret
+      Events:
+        HandleChallenge:
+          Type: Api
+          Properties:
+            Path: /webhook/twitter
+            Method: get
+            RestApiId: !Ref HttpApiGateway
+  
+  TweetsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./dist
+      Handler: functions/tweets.handler
+      Events:
+        HandleOptionsTweets:
+          Type: Api
+          Properties:
+            Path: /tweets
+            Method: options
+            RestApiId: !Ref HttpApiGateway
+        HandlePostTweets:
+          Type: Api
+          Properties:
+            Path: /tweets
+            Method: post
+            RestApiId: !Ref HttpApiGateway
+
+
+Outputs:
+  HttpApiGateway:
+    Description: ApiGateway for lambda functions
+    Value: !Ref HttpApiGateway
+  ChallengeFunction:
+    Description: Respond to twitter webhook challenge
+    Value: !Ref ChallengeFunction
+  TweetsFunction:
+    Description: Handle new Tweets
+    Value: !Ref TweetsFunction
