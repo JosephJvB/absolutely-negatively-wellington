@@ -5,10 +5,8 @@ import { createHmac } from "crypto";
 export const handler = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
     try {
         console.log(event.httpMethod)
-        if (event.httpMethod != 'GET') {
-            return new HttpFailure(
-                'Invalid httpMethod: ' + event.httpMethod,
-                400)
+        if (event.httpMethod == 'OPTIONS') {
+            return new HttpSuccess()
         }
         const token = event.queryStringParameters.crc_token
         const hmac = createHmac('sha256', process.env.twitterApiKeySecret)

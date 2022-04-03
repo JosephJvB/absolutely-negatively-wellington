@@ -4,14 +4,14 @@ require('dotenv').config({
 const fs = require('fs')
 const axios = require('axios')
 
-const cbUrl = ''
+const cbUrl = 'https://hlaaizg6m5.execute-api.ap-southeast-2.amazonaws.com/v1/challenge'
 
 // maybe i need to do this client creds token thing first?
 // https://stackoverflow.com/questions/43628507/how-to-register-a-webhook-url-in-twitter
 
 void async function () {
     // await getToken()
-    // await register()
+    await register()
 }()
 
 async function getToken() {

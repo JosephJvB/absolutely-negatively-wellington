@@ -37,9 +37,9 @@ Resources:
     Properties:
       StageName: v1
       Cors:
-        AllowHeaders: "*"
-        AllowMethods: "*"
-        AllowOrigin: "*"
+        AllowHeaders: "'*'"
+        AllowMethods: "'*'"
+        AllowOrigin: "'*'"
 
   ChallengeFunction:
     Type: AWS::Serverless::Function
@@ -53,7 +53,13 @@ Resources:
         HandleChallenge:
           Type: Api
           Properties:
-            Path: /webhook/twitter
+            Path: /challenge
+            Method: options
+            RestApiId: !Ref HttpApiGateway
+        HandleChallenge:
+          Type: Api
+          Properties:
+            Path: /challenge
             Method: get
             RestApiId: !Ref HttpApiGateway
   
@@ -75,7 +81,6 @@ Resources:
             Path: /tweets
             Method: post
             RestApiId: !Ref HttpApiGateway
-
 
 Outputs:
   HttpApiGateway:
